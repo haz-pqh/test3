@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Map</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .search-container {
+            margin: 20px auto;
+            text-align: center;
+        }
+        #search-bar {
+            padding: 10px;
+            width: 300px;
+            font-size: 16px;
+        }
+        .map-container {
+            position: relative;
+            display: inline-block;
+            margin-top: 20px;
+        }
+        .map {
+            width: 800px;
+            height: auto;
+            background: url('/mnt/data/image.png') no-repeat center center;
+            background-size: contain;
+            position: relative;
+        }
+        .location {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: red;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .highlight {
+            background-color: blue !important;
+        }
+        .tooltip {
+            display: none;
+            position: absolute;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.3);
+            white-space: nowrap;
+        }
+        .direction {
+            margin-top: 10px;
+            font-weight: bold;
+            color: green;
+        }
+        .path {
+            position: absolute;
+            width: 5px;
+            background-color: yellow;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <h1>Interactive Map</h1>
+    <div class="search-container">
+        <input type="text" id="search-bar" placeholder="Search for a location..." onkeyup="searchLocation()">
+        <p id="direction" class="direction"></p>
+    </div>
+    <div class="map-container">
+        <div class="map" id="map">
+            <div class="location" id="start-location" style="top: 550px; left: 100px; background-color: green;" onmouseover="showTooltip(event, 'Starting Point - Masuk Pintu A')" onmouseout="hideTooltip()"></div>
+            <div class="location" id="location-9petak" style="top: 20px; left: 180px;" onmouseover="showTooltip(event, '9 Petak Parking')" onmouseout="hideTooltip()"></div>
+            <div class="location" id="location-28petak" style="top: 200px; left: 150px;" onmouseover="showTooltip(event, '28 Petak Parking')" onmouseout="hideTooltip()"></div>
+            <div class="location" id="location-37petak" style="top: 300px; left: 400px;" onmouseover="showTooltip(event, '37 Petak Parking')" onmouseout="hideTooltip()"></div>
+            <div class="location" id="location-dewanwarisan" style="top: 400px; left: 500px;" onmouseover="showTooltip(event, 'Dewan Warisan')" onmouseout="hideTooltip()"></div>
+            <div class="location" id="location-15petak" style="top: 500px; left: 600px;" onmouseover="showTooltip(event, '15 Petak Parking')" onmouseout="hideTooltip()"></div>
+        </div>
+        <div class="tooltip" id="tooltip"></div>
+    </div>
+    
+    <script>
+        const locations = {
+            "9 petak": "location-9petak",
+            "28 petak": "location-28petak",
+            "37 petak": "location-37petak",
+            "dewan warisan": "location-dewanwarisan",
+            "15 petak": "location-15petak"
+        };
+
+        function showTooltip(event, text) {
+            let tooltip = document.getElementById('tooltip');
+            tooltip.innerHTML = text;
+            tooltip.style.display = 'block';
+            tooltip.style.left = event.pageX + 10 + 'px';
+            tooltip.style.top = event.pageY + 10 + 'px';
+        }
+
+        function hideTooltip() {
+            document.getElementById('tooltip').style.display = 'none';
+        }
+
+        function searchLocation() {
+            let input = document.getElementById('search-bar').value.toLowerCase();
+            let allLocations = document.querySelectorAll('.location');
+            let directionText = document.getElementById('direction');
+            let map = document.getElementById('map');
+            
+            directionText.innerHTML = "";
+            document.querySelectorAll('.path').forEach(path => path.remove());
+            
+            if (input === "") {
+                allLocations.forEach(loc => loc.classList.remove('highlight'));
+                return;
+            }
+            
+            allLocations.forEach(loc => loc.classList.remove('highlight'));
+            
+            Object.keys(locations).forEach(key => {
+                if (key.includes(input)) {
+                    let found = locations[key];
+                    let start = document.getElementById('start-location');
+                    let destination = document.getElementById(found);
+                    destination.classList.add('highlight');
+                    directionText.innerHTML = `Follow the highlighted marker to ${key.toUpperCase()}.`;
+                    
+                    let path = document.createElement('div');
+                    path.className = 'path';
+                    let startX = start.offsetLeft + 10;
+                    let startY = start.offsetTop + 10;
+                    let endX = destination.offsetLeft + 10;
+                    let endY = destination.offsetTop + 10;
+                    
+                    path.style.left = Math.min(startX, endX) + 'px';
+                    path.style.top = Math.min(startY, endY) + 'px';
+                    path.style.width = Math.abs(endX - startX) + 'px';
+                    path.style.height = Math.abs(endY - startY) + 'px';
+                    path.style.backgroundColor = 'yellow';
+                    path.style.position = 'absolute';
+                    
+                    map.appendChild(path);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
